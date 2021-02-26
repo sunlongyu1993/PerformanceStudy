@@ -5,20 +5,17 @@ import org.apache.jmeter.protocol.java.sampler.JavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
-//jmeter的jar包规定的格式
-public class JmeterInsert implements JavaSamplerClient {
+//jmeter的jar包规定的格式_查询请求
+public class JmeterQuery implements JavaSamplerClient {
     String dburl = "jdbc:mysql://localhost:3306/pinter?useUnicode=true&characterEncoding=utf8";
     String dbname = "root";
     String dbpwd = "root";
 
     Connection conn = null;
     PreparedStatement ps = null;//用来存储sql中查询的结果
-    String sql = "INSERT into `user`(user_name,password) VALUES (?,?);";
+    String sql = "select user_name,password from user where id=?";
 
     /**
      * getDefaultParameters:获取参数，设置的参数会在Jmeter的参数面板上显示出来
@@ -31,8 +28,7 @@ public class JmeterInsert implements JavaSamplerClient {
         arguments.addArgument("url", dburl);
         arguments.addArgument("dbname", dbname);
         arguments.addArgument("dbpwd", dbpwd);
-        arguments.addArgument("username", "");
-        arguments.addArgument("pwd", "");
+        arguments.addArgument("id", "1");
         return arguments;
     }
 
@@ -81,23 +77,23 @@ public class JmeterInsert implements JavaSamplerClient {
      */
     @Override
     public SampleResult runTest(JavaSamplerContext arg0) {
-        String username = arg0.getParameter("username");//获取参数
-        String pwd = arg0.getParameter("pwd");//获取参数
+        int id = Integer.parseInt(arg0.getParameter("id"));//获取参数
         SampleResult sampleResult = new SampleResult();
-        sampleResult.setSampleLabel("JavaInsert");//给取样器取名
+        sampleResult.setSampleLabel("JavaQuery");//给取样器取名
         sampleResult.sampleStart();//调用取样器
-        int row = 0;//插入数据的行数，初始值为0
-        try {//替换sql语句中的2个问号，如果有3个值，则需要添加3个变量
-            ps.setString(1, username);
-            ps.setString(2, pwd);
-            row = ps.executeUpdate();//取样器执行，返回结果赋值给row
-            //如果执行成功，则数据库中添加一条数据，则row大于零
-            if (row > 0) {
+        try {//替换sql语句中的1个问号，如果有3个值，则需要添加3个变量
+            ps.setInt(1, id);
+            ResultSet querySet = ps.executeQuery();//取样器执行，
+//如果执行成功，则数据库中添加一条数据，则row大于零
+            if (querySet.next()) {//querySet.next() 判断是否有下一行，如果有就执行，如果没有，就执行结束
                 sampleResult.setSuccessful(true);
-                sampleResult.setResponseData("javainsert请求执行成功，数据库中添加数据为" + row, "UTF-8");
+                sampleResult.setResponseData("javaquery查询成功", "UTF-8");
+                String username = querySet.getString(1);
+                String pwd = querySet.getString(2);
+                System.out.println(username+":"+pwd);
             } else {
                 sampleResult.setSuccessful(false);
-                sampleResult.setResponseData("javainsert请求执行失败，请检查", "UTF-8");
+                sampleResult.setResponseData("javaquery查询失败，请检查", "UTF-8");
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -108,25 +104,10 @@ public class JmeterInsert implements JavaSamplerClient {
 
     //调试
     public static void main(String[] args) {
-        String dburl = "jdbc:mysql://localhost:3306/pinter?useUnicode=true&characterEncoding=utf8";
-        String dbname = "root";
-        String dbpwd = "root";
-        JmeterInsert jmeterInsert = new JmeterInsert();
-        JavaSamplerContext context = new JavaSamplerContext(jmeterInsert.getDefaultParameters());
-        context.getParameter("url");
-        context.getParameter("dbname");
-        context.getParameter("dbpwd");
-        // 往参数中添加值
-        Arguments arguments = new Arguments();
-        arguments.addArgument("url", dburl);
-        arguments.addArgument("dbname", dbname);
-        arguments.addArgument("dbpwd", dbpwd);
-        arguments.addArgument("username", "sly111");
-        arguments.addArgument("pwd", "123456");
-        JavaSamplerContext context2 = new JavaSamplerContext(arguments);//将参数值传入
-        JmeterInsert jmeterInsert2 = new JmeterInsert();
-        jmeterInsert2.setupTest(context2);
-        jmeterInsert2.runTest(context2);
-        jmeterInsert2.teardownTest(context2);
+        JmeterQuery jmeterQuery = new JmeterQuery();
+        JavaSamplerContext context = new JavaSamplerContext(jmeterQuery.getDefaultParameters());
+        jmeterQuery.setupTest(context);
+        jmeterQuery.runTest(context);
+        jmeterQuery.teardownTest(context);
     }
 }
