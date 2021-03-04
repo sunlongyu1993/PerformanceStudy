@@ -100,7 +100,7 @@ public class JmeterQuery implements JavaSamplerClient {
             while (querySet.next()){//querySet.next() 判断是否有下一行，如果有就执行，如果没有，就执行结束
                 //获取查询结果第一列+获取查询结果第er列,赋值给result
                 result =querySet.getString(1)+"|"+querySet.getString(2);
-                System.out.println(result);
+//                System.out.println(result);
                 results.add(result);//将获取的结果添加到集合中去
             }
             if (querySet.getRow()>=0){
