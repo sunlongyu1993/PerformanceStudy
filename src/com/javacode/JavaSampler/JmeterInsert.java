@@ -83,9 +83,11 @@ public class JmeterInsert implements JavaSamplerClient {
     public SampleResult runTest(JavaSamplerContext arg0) {
         String username = arg0.getParameter("username");//获取参数
         String pwd = arg0.getParameter("pwd");//获取参数
+
         SampleResult sampleResult = new SampleResult();
         sampleResult.setSampleLabel("JavaInsert");//给取样器取名
         sampleResult.sampleStart();//调用取样器
+
         int row = 0;//插入数据的行数，初始值为0
         try {//替换sql语句中的2个问号，如果有3个值，则需要添加3个变量
             ps.setString(1, username);
@@ -108,21 +110,24 @@ public class JmeterInsert implements JavaSamplerClient {
 
     //调试
     public static void main(String[] args) {
-        String dburl = "jdbc:mysql://localhost:3306/pinter?useUnicode=true&characterEncoding=utf8";
-        String dbname = "root";
-        String dbpwd = "root";
+//        String dburl = "jdbc:mysql://localhost:3306/pinter?useUnicode=true&characterEncoding=utf8";
+//        String dbname = "root";
+//        String dbpwd = "root";
+
         JmeterInsert jmeterInsert = new JmeterInsert();
         JavaSamplerContext context = new JavaSamplerContext(jmeterInsert.getDefaultParameters());
-        context.getParameter("url");
-        context.getParameter("dbname");
-        context.getParameter("dbpwd");
+        String dburl = context.getParameter("url");//获取
+        String dbname = context.getParameter("dbname");
+        String dbpwd = context.getParameter("dbpwd");
+
         // 往参数中添加值
         Arguments arguments = new Arguments();
         arguments.addArgument("url", dburl);
         arguments.addArgument("dbname", dbname);
         arguments.addArgument("dbpwd", dbpwd);
-        arguments.addArgument("username", "sly111");
+        arguments.addArgument("username", "sly111123");
         arguments.addArgument("pwd", "123456");
+
         JavaSamplerContext context2 = new JavaSamplerContext(arguments);//将参数值传入
         JmeterInsert jmeterInsert2 = new JmeterInsert();
         jmeterInsert2.setupTest(context2);

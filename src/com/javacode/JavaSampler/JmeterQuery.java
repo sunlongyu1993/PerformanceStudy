@@ -6,6 +6,8 @@ import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 //jmeter的jar包规定的格式_查询请求
 public class JmeterQuery implements JavaSamplerClient {
@@ -15,7 +17,7 @@ public class JmeterQuery implements JavaSamplerClient {
 
     Connection conn = null;
     PreparedStatement ps = null;//用来存储sql中查询的结果
-    String sql = "select user_name,password from user where id=?";
+    String sql = "select user_name,password from user where id>?";
 
     /**
      * getDefaultParameters:获取参数，设置的参数会在Jmeter的参数面板上显示出来
@@ -71,29 +73,44 @@ public class JmeterQuery implements JavaSamplerClient {
 
     /**
      * runTest:执行N次，处理业务
-     *
      * @param arg0
      * @return
      */
     @Override
     public SampleResult runTest(JavaSamplerContext arg0) {
-        int id = Integer.parseInt(arg0.getParameter("id"));//获取参数
+        int id = Integer.parseInt(arg0.getParameter("id"));//获取参数，将字符串转为int
         SampleResult sampleResult = new SampleResult();
         sampleResult.setSampleLabel("JavaQuery");//给取样器取名
         sampleResult.sampleStart();//调用取样器
         try {//替换sql语句中的1个问号，如果有3个值，则需要添加3个变量
             ps.setInt(1, id);
             ResultSet querySet = ps.executeQuery();//取样器执行，
-//如果执行成功，则数据库中添加一条数据，则row大于零
-            if (querySet.next()) {//querySet.next() 判断是否有下一行，如果有就执行，如果没有，就执行结束
-                sampleResult.setSuccessful(true);
-                sampleResult.setResponseData("javaquery查询成功", "UTF-8");
-                String username = querySet.getString(1);
-                String pwd = querySet.getString(2);
-                System.out.println(username+":"+pwd);
-            } else {
-                sampleResult.setSuccessful(false);
-                sampleResult.setResponseData("javaquery查询失败，请检查", "UTF-8");
+//            if (querySet.next()) {//querySet.next() 判断是否有下一行，如果有就执行，如果没有，就执行结束
+//                sampleResult.setSuccessful(true);
+//                sampleResult.setResponseData("javaquery查询成功", "UTF-8");
+//                String username = querySet.getString(1);//获取查询结果第一列
+//                String pwd = querySet.getString(2);//获取查询结果第二列
+//                System.out.println(username+":"+pwd);
+//            } else {
+//                sampleResult.setSuccessful(false);
+//                sampleResult.setResponseData("javaquery查询失败，请检查", "UTF-8");
+//            }
+            String result = "";
+            List<String> results = new ArrayList<>();
+            while (querySet.next()){//querySet.next() 判断是否有下一行，如果有就执行，如果没有，就执行结束
+                //获取查询结果第一列+获取查询结果第er列,赋值给result
+                result =querySet.getString(1)+"|"+querySet.getString(2);
+                System.out.println(result);
+                results.add(result);//将获取的结果添加到集合中去
+            }
+            if (querySet.getRow()>=0){
+                sampleResult.setSuccessful(true);//查询成功
+                sampleResult.setResponseData("查询成功，结果如下："+results.toString(),"UTF-8");
+
+            }else {
+                sampleResult.setSuccessful(false);//查询失败
+                sampleResult.setResponseData("查询失败","UTF-8");
+
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
