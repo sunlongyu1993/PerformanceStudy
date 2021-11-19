@@ -22,7 +22,6 @@ public class JmeterInsert implements JavaSamplerClient {
 
     /**
      * getDefaultParameters:获取参数，设置的参数会在Jmeter的参数面板上显示出来
-     *
      * @return
      */
     @Override//首先执行，获取默认参数
@@ -38,7 +37,6 @@ public class JmeterInsert implements JavaSamplerClient {
 
     /**
      * setupTest:初始化方法，只执行一次，跟LR里的init方法一样的，用于建立链接
-     *
      * @param arg0
      */
 
@@ -60,7 +58,6 @@ public class JmeterInsert implements JavaSamplerClient {
 
     /**
      * teardownTest:结束方法，只执行一次，LR里的end方法是一样的，用于释放资源
-     *
      * @param arg0
      */
     @Override
@@ -75,7 +72,6 @@ public class JmeterInsert implements JavaSamplerClient {
 
     /**
      * runTest:执行N次，处理业务
-     *
      * @param arg0
      * @return
      */
